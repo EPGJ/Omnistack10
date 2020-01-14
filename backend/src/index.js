@@ -1,15 +1,17 @@
-const express = require("express");
-const mongoose = require ("mongoose");
+const express = require("express")
+const mongoose = require ("mongoose")
+const dotenv = require("dotenv")
 const routes = require("./routes")
 const app = express();
-mongoose.connect("mongodb+srv://epgj:paralax@cluster0-8scer.mongodb.net/week10?retryWrites=true&w=majority",{
-    useUnifiedTopology: true,
-    useNewUrlParser: true
+
+
+dotenv.config()
+mongoose.connect(process.env.DB_CONNECT,{useUnifiedTopology: true,useNewUrlParser: true },()=>{
+    console.log("connected to db!")
 })
 mongoose.set('useCreateIndex', true);
 app.use(express.json());
 app.use(routes);
 
 
-
-app.listen(3333)    
+app.listen(3333,()=> console.log("Server running"))    
