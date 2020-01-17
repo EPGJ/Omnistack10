@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { StyleSheet, Image, View, Text, TextInput, TouchableOpacity } from 'react-native'
 import MapView, { Marker, Callout } from 'react-native-maps'
 import { requestPermissionsAsync, getCurrentPositionAsync } from 'expo-location'
-import api from '../services/api'
 import { MaterialIcons } from "@expo/vector-icons"
+
+import api from '../services/api'
+import {connect, disconnect,subscribeToNewDevs} from "../services/socket"
 
 
 function Main({ navigation }) {
@@ -31,10 +33,25 @@ function Main({ navigation }) {
         }
         loadInitialPosition()
     }, [])
-    // console.log(currentRegion)
+
+    useEffect(()=>{
+        subscribeToNewDevs(dev => setDevs([...devs,dev]))
+    },[devs])
+
+    function setupWebsocket(){
+        disconnect()
+
+        const {latitude, longitude} = currentRegion
+        connect(
+            latitude,
+            longitude,
+            techs
+        )
+    }
+
     async function loadDevs() {
         const { latitude, longitude } = currentRegion
-        // console.log(latitude,longitude)
+       
         const res = await api.get("/search", {
             params: {
                 latitude,
@@ -42,9 +59,9 @@ function Main({ navigation }) {
                 techs
             }
         })
-        // console.log(res.data.devs)
+
         setDevs(res.data.devs)
-        // console.log(devs)
+        setupWebsocket()
     }
 
     function handleRegionChanged(region) {
